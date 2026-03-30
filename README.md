@@ -69,6 +69,16 @@ cidrmatch("192.168.0.0/16", srcip),
 ![Dashboard](screenshots/soc-dashboard.png)
 
 ---
+## 🧠 Skills Demonstrated
+- Log Analysis
+- SIEM (Splunk)
+- Threat Detection
+- Alert Configuration
+- Dashboard Creation
+- Incident Analysis
+
+---
+
 
 ## 🧠 Conclusion
 The project successfully detects reconnaissance activity (port scanning) and enables real-time monitoring using alerts and dashboards.
