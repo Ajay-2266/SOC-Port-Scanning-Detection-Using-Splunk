@@ -1,0 +1,94 @@
+==============================
+SOC PORT SCANNING DETECTION
+==============================
+
+1. View all logs
+index=*
+
+------------------------------
+
+2. Find denied traffic
+index=* action=deny
+
+------------------------------
+
+3. Top attacker IPs
+index=* action=deny
+| stats count by srcip
+| sort -count
+
+------------------------------
+
+4. Targeted ports
+index=* action=deny
+| stats count by dstport
+| sort -count
+
+------------------------------
+
+5. Traffic trend (time-based)
+index=* action=deny
+| timechart count
+
+------------------------------
+
+6. Identify external IPs
+index=*
+| eval is_internal=if(
+ cidrmatch("10.0.0.0/8", srcip) OR
+ cidrmatch("172.16.0.0/12", srcip) OR
+ cidrmatch("192.168.0.0/16", srcip),
+ "yes","no"
+)
+| stats count by srcip, is_internal
+
+------------------------------
+
+7. Filter only external attackers
+index=* action=deny
+| eval is_internal=if(
+ cidrmatch("10.0.0.0/8", srcip) OR
+ cidrmatch("172.16.0.0/12", srcip) OR
+ cidrmatch("192.168.0.0/16", srcip),
+ "yes","no"
+)
+| search is_internal="no"
+| stats count by srcip
+| sort -count
+
+------------------------------
+
+8. Port scanning detection (MAIN QUERY)
+index=* action=deny
+| eval is_internal=if(
+ cidrmatch("10.0.0.0/8", srcip) OR
+ cidrmatch("172.16.0.0/12", srcip) OR
+ cidrmatch("192.168.0.0/16", srcip),
+ "yes","no"
+)
+| search is_internal="no"
+| stats dc(dstport) as unique_ports count by srcip
+| where unique_ports > 5
+| sort -unique_ports
+
+------------------------------
+
+9. Time-based port scan detection
+index=* action=deny
+| eval is_internal=if(
+ cidrmatch("10.0.0.0/8", srcip) OR
+ cidrmatch("172.16.0.0/12", srcip) OR
+ cidrmatch("192.168.0.0/16", srcip),
+ "yes","no"
+)
+| search is_internal="no"
+| bin _time span=5m
+| stats dc(dstport) as unique_ports by srcip, _time
+| where unique_ports > 5
+
+------------------------------
+
+10. Top denied IPs
+index=* action=deny
+| stats count by srcip
+| sort -count
