@@ -1,0 +1,13 @@
+           Attacker
+              |
+              V
+          Firewall (Logs)
+              |
+              V
+            Splunk
+              |
+              V
+            Alert
+              |
+              V
+          Dashboard
